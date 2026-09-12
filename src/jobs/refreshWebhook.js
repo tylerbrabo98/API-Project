@@ -1,18 +1,14 @@
-// Airtable webhooks expire after roughly a week of inactivity if not
-// explicitly refreshed. Run this on a schedule (e.g. a daily cron on
-// whatever host runs the server, or a scheduled job on Render/Railway) —
-// without it, the pipeline will silently stop receiving new-lead pings and
-// the first sign of trouble will be "why hasn't anything alerted in days."
-//
-// TODO: call POST /bases/{baseId}/webhooks/{webhookId}/refresh
-// (see src/integrations/airtable.js for the pattern other Airtable calls
-// follow — this could live there instead once implemented).
+import { refreshWebhook } from "../integrations/airtable.js";
 
-async function refreshWebhook() {
-  throw new Error("TODO: implement refreshWebhook — see comment above");
-}
+// Airtable webhooks expire ~7 days after creation, or ~7 days after the
+// last time payloads were fetched or this refresh call was made -- whichever
+// is more recent. A pipeline that's actively receiving leads refreshes
+// itself as a side effect of fetchWebhookPayloads, but a quiet base (no
+// leads for a week) would let the subscription lapse silently otherwise.
+// Run this on a schedule (daily is comfortably safe) via cron on whatever
+// host runs the server, or a scheduled job on Render/Railway.
 
 refreshWebhook().catch((err) => {
-  console.error("Failed to refresh Airtable webhook:", err);
+  console.error("Failed to refresh Airtable webhook:", err.message);
   process.exit(1);
 });
