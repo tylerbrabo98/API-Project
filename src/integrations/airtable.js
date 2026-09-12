@@ -181,6 +181,28 @@ export async function getLeadRecord(recordId) {
 }
 
 /**
+ * Fetch the most recent leads for the dashboard, newest first.
+ *
+ * Airtable's list-records endpoint doesn't support sorting by internal
+ * creation metadata through a query param -- but every record it returns
+ * always carries a top-level `createdTime`, regardless of table fields, so
+ * sorting client-side after the fetch is simpler than fighting the API for
+ * server-side sort on something that isn't a real field.
+ */
+export async function listRecentLeads(limit = 20) {
+  const url = new URL(`${RECORDS_API_BASE}/${config.airtable.baseId}/${encodeURIComponent(config.airtable.tableName)}`);
+  url.searchParams.set("maxRecords", "100");
+
+  const res = await airtableRequest("GET", url);
+  const data = await res.json();
+
+  return data.records
+    .slice()
+    .sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime))
+    .slice(0, limit);
+}
+
+/**
  * PATCH the lead record with enrichment results and the suggested next
  * action. Only sets the fields that have data -- when enrichment found
  * nothing, industry/company size are left alone rather than overwritten

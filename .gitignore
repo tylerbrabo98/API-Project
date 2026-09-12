@@ -4,3 +4,16 @@ data/*.db
 data/*.db-journal
 *.log
 .DS_Store
+
+# Scratch files used to hand secrets to the assistant without pasting them
+# into chat -- always meant to be deleted after transfer to .env, but
+# ignored here too as a second line of defense against a stray `git add -A`.
+*Key*
+*key*
+*PAT*
+*pat*
+*Token*
+*token*
+*webhook URLs*
+*API*
+!package*.json

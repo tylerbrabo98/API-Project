@@ -5,8 +5,7 @@ lands in Airtable, the pipeline enriches it with company data, alerts the
 right sales channel in Discord with a suggested next action, and writes the
 enrichment data back onto the lead record.
 
-Built as a standalone project on personal/free-tier accounts — intentionally
-decoupled from any employer's tools or data.
+Built as a standalone project on personal/free-tier accounts.
 
 ## Why this stack
 

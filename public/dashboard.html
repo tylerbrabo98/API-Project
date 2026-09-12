@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lead Pipeline — Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #eef2f0;
+    --surface: #ffffff;
+    --surface-2: #e3e9e5;
+    --ink: #16211e;
+    --ink-muted: #55655f;
+    --border: #ccd6d0;
+    --accent: #0e7a72;
+    --accent-soft: #dcefec;
+    --stage-source: #a8631a;
+    --stage-source-soft: #f3e4d1;
+    --stage-alert: #5b4a9c;
+    --stage-alert-soft: #e6e2f4;
+    --pending: #8b8f8c;
+    --pending-soft: #e6e8e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1614;
+      --surface: #16211e;
+      --surface-2: #1c2825;
+      --ink: #e9f2ef;
+      --ink-muted: #93a49e;
+      --border: #2b3a35;
+      --accent: #55d0c3;
+      --accent-soft: #17322e;
+      --stage-source: #e0a058;
+      --stage-source-soft: #33291a;
+      --stage-alert: #ad9de8;
+      --stage-alert-soft: #272238;
+      --pending: #9aa19d;
+      --pending-soft: #212a27;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 72px; display: flex; flex-direction: column; gap: 28px; }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+  header { display: flex; flex-direction: column; gap: 10px; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  h1 { margin: 0; font-size: 30px; letter-spacing: -0.01em; }
+  .dek { color: var(--ink-muted); font-size: 15px; max-width: 58ch; }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+
+  .lead-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .lead {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .lead-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .lead-name { font-weight: 600; font-size: 16px; }
+  .lead-time { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--ink-muted); white-space: nowrap; }
+
+  .chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .chip.enterprise { background: var(--accent-soft); color: var(--accent); }
+  .chip.smb { background: var(--stage-source-soft); color: var(--stage-source); }
+  .chip.unknown { background: var(--stage-alert-soft); color: var(--stage-alert); }
+  .chip.pending { background: var(--pending-soft); color: var(--pending); }
+
+  .lead-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 13.5px;
+    color: var(--ink-muted);
+  }
+  .lead-meta b { color: var(--ink); font-weight: 500; }
+  .lead-action {
+    font-size: 13.5px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .lead-action .label { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); margin-right: 8px; }
+
+  .empty, .error {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 14.5px;
+  }
+  footer { font-size: 12.5px; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="eyebrow">Live Demo</span>
+      <h1>Lead Pipeline</h1>
+      <p class="dek">Real leads, pulled straight from Airtable as the pipeline enriches and routes them. Create a new lead in the base and it'll show up here within a few seconds.</p>
+      <div class="status-bar"><span class="dot"></span><span id="status">connecting…</span></div>
+    </header>
+
+    <div id="content" class="lead-list">
+      <div class="empty">Loading recent leads…</div>
+    </div>
+
+    <footer>Emails are shown as domain only — this view is public. Auto-refreshes every 8 seconds.</footer>
+  </div>
+
+<script>
+  const contentEl = document.getElementById('content');
+  const statusEl = document.getElementById('status');
+
+  function timeAgo(iso) {
+    if (!iso) return '';
+    const diff = Math.max(0, Date.now() - new Date(iso).getTime());
+    const s = Math.floor(diff / 1000);
+    if (s < 60) return s + 's ago';
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    return h + 'h ago';
+  }
+
+  function bucketLabel(bucket) {
+    return { enterprise: 'Enterprise', smb: 'SMB', unknown: 'Unknown', pending: 'Processing…' }[bucket] || bucket;
+  }
+
+  function renderLead(lead) {
+    const meta = [];
+    if (lead.company) meta.push('<span><b>' + escapeHtml(lead.company) + '</b></span>');
+    if (lead.emailDomain) meta.push('<span>@' + escapeHtml(lead.emailDomain) + '</span>');
+    if (lead.industry) meta.push('<span>' + escapeHtml(lead.industry) + '</span>');
+    if (lead.companySize != null) meta.push('<span>' + Number(lead.companySize).toLocaleString() + ' employees</span>');
+
+    const action = lead.suggestedNextAction
+      ? '<div class="lead-action"><span class="label">Next action</span>' + escapeHtml(lead.suggestedNextAction) + '</div>'
+      : '';
+
+    return (
+      '<div class="lead">' +
+        '<div class="lead-top">' +
+          '<span class="lead-name">' + escapeHtml(lead.name || 'Unnamed lead') + '</span>' +
+          '<span class="chip ' + lead.bucket + '">' + bucketLabel(lead.bucket) + '</span>' +
+        '</div>' +
+        (meta.length ? '<div class="lead-meta">' + meta.join('') + '</div>' : '') +
+        action +
+        '<div class="lead-time">' + timeAgo(lead.createdTime) + '</div>' +
+      '</div>'
+    );
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  async function refresh() {
+    try {
+      const res = await fetch('/api/leads');
+      if (!res.ok) throw new Error('status ' + res.status);
+      const leads = await res.json();
+      statusEl.textContent = 'live — updated ' + new Date().toLocaleTimeString();
+      contentEl.innerHTML = leads.length
+        ? leads.map(renderLead).join('')
+        : '<div class="empty">No leads yet — add a row to the Leads table in Airtable to see it appear here.</div>';
+    } catch (err) {
+      statusEl.textContent = 'connection issue, retrying…';
+      if (!contentEl.querySelector('.lead')) {
+        contentEl.innerHTML = '<div class="error">Could not reach the pipeline right now. This page will keep retrying.</div>';
+      }
+    }
+  }
+
+  refresh();
+  setInterval(refresh, 8000);
+</script>
+</body>
+</html>
