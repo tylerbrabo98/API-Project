@@ -21,9 +21,19 @@ export const config = {
     pat: process.env.AIRTABLE_PAT,
     baseId: process.env.AIRTABLE_BASE_ID,
     tableName: process.env.AIRTABLE_TABLE_NAME || "Leads",
+    // Webhook subscriptions filter by table ID (e.g. "tblXXXXXXXXXXXXXX"),
+    // not table name -- Airtable's webhook spec requires it for
+    // recordChangeScope. Grab it from the API docs page for your base, or
+    // the URL bar when the table is open.
+    tableId: process.env.AIRTABLE_TABLE_ID,
     webhookId: process.env.AIRTABLE_WEBHOOK_ID,
     webhookMacSecret: process.env.AIRTABLE_WEBHOOK_MAC_SECRET,
   },
+
+  // Public HTTPS URL of this deployed server, used to register the
+  // notificationUrl Airtable pings on record creation. Only needed once
+  // deployed -- see scripts/setupWebhook.js.
+  publicBaseUrl: process.env.PUBLIC_BASE_URL,
 
   abstractApi: {
     apiKey: process.env.ABSTRACT_API_KEY,
@@ -48,5 +58,6 @@ export const config = {
 export function assertRequiredConfig() {
   required("AIRTABLE_PAT");
   required("AIRTABLE_BASE_ID");
+  required("AIRTABLE_TABLE_ID");
   required("ABSTRACT_API_KEY");
 }
