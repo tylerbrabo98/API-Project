@@ -11,7 +11,7 @@
     "refresh-webhook": "node src/jobs/refreshWebhook.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": "20.x"
   },
   "dependencies": {
     "better-sqlite3": "^11.3.0",
