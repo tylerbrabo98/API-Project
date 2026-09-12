@@ -92,9 +92,22 @@ export async function enrichCompany(domain) {
 
   // AbstractAPI's docs don't specify a "not found" status code — in
   // practice, a domain with no company data comes back as 200 with an
-  // effectively empty body. So presence of `name` is the real signal here,
-  // not the HTTP status.
-  const found = Boolean(data && data.name);
+  // effectively empty body. So presence of `company_name` is the real
+  // signal here, not the HTTP status.
+  //
+  // NOTE: AbstractAPI's marketing page shows an example response using
+  // `name` / `employees_count`, but the live API actually returns
+  // `company_name` / `employee_count` (singular) -- confirmed by calling
+  // the real endpoint directly, since the two disagree. First version of
+  // this function trusted the marketing page's field names and silently
+  // treated every real result as "not found" as a result -- caught only by
+  // testing against the live API with a domain (airbnb.com) known to have
+  // data, not by reading docs. Worth remembering: a documented example
+  // response is a claim about behavior at the time it was written, not a
+  // guarantee -- verify against the live endpoint when a field silently
+  // never populates instead of assuming the integration is just "working
+  // as designed" with empty data.
+  const found = Boolean(data && data.company_name);
 
   logger.info("AbstractAPI lookup complete", { domain, found, durationMs });
 
@@ -104,9 +117,9 @@ export async function enrichCompany(domain) {
 
   return {
     found: true,
-    companyName: data.name ?? null,
+    companyName: data.company_name ?? null,
     industry: data.industry ?? null,
-    employeeCount: typeof data.employees_count === "number" ? data.employees_count : null,
+    employeeCount: typeof data.employee_count === "number" ? data.employee_count : null,
     country: data.country ?? null,
   };
 }
