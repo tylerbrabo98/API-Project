@@ -5,6 +5,8 @@ lands in Airtable, the pipeline enriches it with company data, alerts the
 right sales channel in Discord with a suggested next action, and writes the
 enrichment data back onto the lead record. No human touches any of it.
 
+**[Read the full case study](https://tylerbrabo98.github.io/API-Project/)**, covering the story of how this was built plus the same architecture breakdown as below.
+
 Built as a standalone project on personal, free-tier accounts.
 
 ## Why this stack
