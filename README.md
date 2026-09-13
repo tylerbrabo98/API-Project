@@ -134,3 +134,7 @@ goes there and why — this is a scaffold, not a working pipeline yet.
   credential. A deliberate scope choice for a single-account portfolio
   project; worth being able to speak to how a multi-tenant OAuth version
   would differ.
+
+## License
+
+[MIT](LICENSE)
